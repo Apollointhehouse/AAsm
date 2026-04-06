@@ -1,5 +1,6 @@
 package dev.apollointhehouse.execution
 
+import dev.apollointhehouse.asm.Address
 import dev.apollointhehouse.asm.OpCode
 import dev.apollointhehouse.asm.OpCode.*
 
@@ -12,15 +13,25 @@ class ControlUnit(
     private var cRegister: Int = 0
 
     fun clock() {
-        val data   =  programCounter.load()
-        val opCode = OpCode.entries[(data and 0xF000) shr 12]
-        val addr   = (data and 0x0FFF)
+        val data  = fetch()
+        val (opCode, addr) = decode(data)
 
-        if (debug) println("OP: $opCode, ADDR: ${addr.toString(16).padEnd(3, '0')}".uppercase())
+        if (debug) println("OP: $opCode, ADDR: ${addr.value.toString(16).padEnd(3, '0')}".uppercase())
 
-        execute(opCode, addr)
+        execute(opCode, addr.value)
 
         programCounter.clock()
+    }
+
+    private fun fetch(): Int {
+        return programCounter.load()
+    }
+
+    private fun decode(data: Int): Pair<OpCode, Address.Raw> {
+        val opCode = OpCode.entries[(data and 0xF000) shr 12]
+        val addr   = Address.Raw(data and 0x0FFF)
+
+        return opCode to addr
     }
 
     private fun execute(opCode: OpCode, addr: Int) {
