@@ -5,8 +5,9 @@ import java.util.*
 data class Memory(private val memory: Array<Int> = Array(256) { 0 }) : Stack<Int>() {
 
     fun load(address: Int): Int = memory[address]
-    fun store(address: Int, value: Int) {
+    fun store(address: Int, value: Int): Int {
         memory[address] = value
+        return address
     }
 
     private var stackPtr: Int = (memory.size - 1)

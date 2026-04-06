@@ -1,5 +1,6 @@
 package dev.apollointhehouse
 
+import dev.apollointhehouse.asm.Instruction
 import dev.apollointhehouse.execution.ControlUnit
 import dev.apollointhehouse.execution.HaltException
 import dev.apollointhehouse.execution.Memory
@@ -37,15 +38,16 @@ fun main() {
         name to memory.push(value)
     }
 
-    var iPtr = 0
-    for ((opCode, addr) in asm.instructions) {
-        val resolved = addr.resolve(symbolTable)
+    val instructions = asm.instructions.map { (opCode, addr) ->
+        opCode to addr.resolve(symbolTable)
+    }
 
-        memory.store(iPtr++, opCode + resolved)
+    instructions.fold(0) { ptr, (op, addr) ->
+        memory.store(ptr, op + addr.value)
     }
 
     println("Starting Execution:")
-    val controlUnit = ControlUnit(memory)
+    val controlUnit = ControlUnit(memory, debug = true)
     try {
         while (true) {
             controlUnit.clock()
