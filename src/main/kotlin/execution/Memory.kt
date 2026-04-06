@@ -1,12 +1,12 @@
 package dev.apollointhehouse.execution
 
-import java.util.*
+import dev.apollointhehouse.asm.Address
 
-data class Memory(private val memory: Array<Int> = Array(256) { 0 }) : Stack<Int>() {
+data class Memory(private val memory: Array<Int> = Array(256) { 0 }) {
 
-    fun load(address: Int): Int = memory[address]
-    fun store(address: Int, value: Int): Int {
-        memory[address] = value
+    fun load(address: Address.Raw): Int = memory[address.value]
+    fun store(address: Address.Raw, value: Int): Address.Raw {
+        memory[address.value] = value
         return address
     }
 
@@ -15,18 +15,18 @@ data class Memory(private val memory: Array<Int> = Array(256) { 0 }) : Stack<Int
             field = value % memory.size
         }
 
-    override fun push(value: Int): Int {
-        store(stackPtr, value)
-        return stackPtr--
+    fun push(value: Int): Address.Raw {
+        store(Address.Raw(stackPtr), value)
+        return Address.Raw(stackPtr--)
     }
 
-    override fun pop(): Int {
+    fun pop(): Address.Raw {
         stackPtr++
-        return stackPtr
+        return Address.Raw(stackPtr)
     }
 
-    override fun peek(): Int {
-        return stackPtr
+    fun peek(): Address.Raw {
+        return Address.Raw(stackPtr)
     }
 
     override fun toString(): String {

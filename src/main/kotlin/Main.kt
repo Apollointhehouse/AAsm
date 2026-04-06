@@ -1,5 +1,6 @@
 package dev.apollointhehouse
 
+import dev.apollointhehouse.asm.Address
 import dev.apollointhehouse.execution.ControlUnit
 import dev.apollointhehouse.execution.HaltException
 import dev.apollointhehouse.execution.Memory
@@ -31,8 +32,13 @@ fun main() {
     val parser = Parser()
     val memory = Memory()
 
+    println("Parsing:")
     val asm = parser.parseASM(example)
 
+    println(asm)
+    println()
+
+    println("Resolving symbols:")
     val symbolTable = asm.data.associate { (name, value) ->
         name to memory.push(value)
     }
@@ -40,19 +46,27 @@ fun main() {
     val instructions = asm.instructions.map { (opCode, addr) ->
         opCode to addr.resolve(symbolTable)
     }
+    println(instructions)
+    println()
 
-    instructions.fold(0) { ptr, (op, addr) ->
+    println("Writing instructions:")
+    instructions.fold(Address.Raw(0)) { ptr, (op, addr) ->
+        println((op + addr.value).toString(2).padEnd(16, '0'))
         memory.store(ptr, op + addr.value) + 1
     }
+    println()
 
     println("Starting Execution:")
-    val controlUnit = ControlUnit(memory, debug = true)
+    val controlUnit = ControlUnit(
+        memory = memory,
+        debug = false
+    )
     try {
         while (true) {
             controlUnit.clock()
         }
-    } catch (_: HaltException) {
-        println()
-        println("Execution Completed!")
-    }
+    } catch (_: HaltException) {}
+
+    println()
+    println("Execution Completed!")
 }

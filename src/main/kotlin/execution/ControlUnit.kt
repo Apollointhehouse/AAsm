@@ -18,7 +18,7 @@ class ControlUnit(
 
         if (debug) println("OP: $opCode, ADDR: ${addr.value.toString(16).padEnd(3, '0')}".uppercase())
 
-        execute(opCode, addr.value)
+        execute(opCode, addr)
 
         programCounter.clock()
     }
@@ -34,7 +34,7 @@ class ControlUnit(
         return opCode to addr
     }
 
-    private fun execute(opCode: OpCode, addr: Int) {
+    private fun execute(opCode: OpCode, addr: Address.Raw) {
         when (opCode) {
             LOAD -> {
                 register = memory.load(addr)
