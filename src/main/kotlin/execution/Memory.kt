@@ -1,16 +1,12 @@
 package dev.apollointhehouse.execution
 
-import dev.apollointhehouse.asm.OpCode
-import java.util.Stack
+import java.util.*
 
 data class Memory(private val memory: Array<Int> = Array(256) { 0 }) : Stack<Int>() {
 
     fun load(address: Int): Int = memory[address]
     fun store(address: Int, value: Int) {
         memory[address] = value
-    }
-    fun store(address: Int, opCode: OpCode) {
-        memory[address] = opCode.code
     }
 
     private var stackPtr: Int = (memory.size - 1)

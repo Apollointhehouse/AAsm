@@ -30,7 +30,7 @@ class Parser {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
 
-        if (values.size == 0) throw IllegalStateException("No instructions found")
+        if (values.isEmpty()) throw IllegalStateException("No instructions found")
         val opCode = OpCode.from(values[0])
 
         if (values.size == 2) {

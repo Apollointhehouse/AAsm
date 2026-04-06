@@ -18,7 +18,6 @@ enum class OpCode(val code: Int) {
     OUT(0xE000),
     HALT(0xF000);
 
-    infix fun or(addr: Int) = code or addr
     operator fun plus(addr: Int) = code or addr
 
     companion object {
