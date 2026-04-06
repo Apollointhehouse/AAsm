@@ -1,6 +1,5 @@
 package dev.apollointhehouse
 
-import dev.apollointhehouse.asm.Instruction
 import dev.apollointhehouse.execution.ControlUnit
 import dev.apollointhehouse.execution.HaltException
 import dev.apollointhehouse.execution.Memory
@@ -43,7 +42,7 @@ fun main() {
     }
 
     instructions.fold(0) { ptr, (op, addr) ->
-        memory.store(ptr, op + addr.value)
+        memory.store(ptr, op + addr.value) + 1
     }
 
     println("Starting Execution:")
