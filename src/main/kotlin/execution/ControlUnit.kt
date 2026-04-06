@@ -28,7 +28,8 @@ class ControlUnit(
     }
 
     private fun decode(data: Int): Pair<OpCode, Address.Raw> {
-        val opCode = OpCode.entries[(data and 0xF000) shr 12]
+        val opCodeValue = data and 0xF000
+        val opCode = OpCode.entries.find { it.code == opCodeValue } ?: throw IllegalStateException("Unknown OpCode: $opCodeValue")
         val addr   = Address.Raw(data and 0x0FFF)
 
         return opCode to addr

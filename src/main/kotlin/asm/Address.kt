@@ -6,7 +6,7 @@ sealed interface Address {
             this
 
         override fun toString(): String {
-            return "Raw(value=${value.toString(16).padEnd(3, '0').uppercase()})"
+            return "Raw(value=${value.toString(16).padStart(3, '0').uppercase()})"
         }
 
         operator fun plus(other: Int) = Raw(value + other)
