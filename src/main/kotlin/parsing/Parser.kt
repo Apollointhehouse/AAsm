@@ -17,7 +17,7 @@ class Parser {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
 
-        val split = lines.indexOf("HALT") + 1
+        val split = lines.indexOfFirst { "HALT" in it } + 1
 
         val instructions = parseInstructions(lines.subList(0, split))
         val data = parseData(lines.subList(split, lines.size), instructions.size)
@@ -68,8 +68,9 @@ class Parser {
             .split(":")
             .map { it.trim() }
 
-        symbolTable[name] = Address.Raw(memStart + index)
+        val addr =  Address.Raw(memStart + index)
+        symbolTable[name] = addr
 
-        Data(name, value.toInt())
+        Data(name, value.toInt(), addr)
     }
 }

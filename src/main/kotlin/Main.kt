@@ -6,26 +6,29 @@ import dev.apollointhehouse.execution.HaltException
 import dev.apollointhehouse.execution.Memory
 import dev.apollointhehouse.parsing.Parser
 
+// Fibonacci example
 const val example = """
-        IN N
-    
-START:  LOAD  ZERO
-        COMP  N
+        IN    MAX
+START:  OUT   A
+        LOAD  B
+        STORE TEMP
+        ADD   A
+        STORE B
+
+        LOAD  TEMP
+        STORE A
+
+        COMP  MAX
         JMPLT END
-        
-        LOAD  SUM
-        ADD   N
-        STORE SUM
-        
-        IN N
-        JMP START
-        
-END:    OUT SUM
-        HALT
-        
-        SUM: 0
-        N: 0
-        ZERO: 0
+
+        JMP   START
+
+END:    HALT
+
+        MAX:  0
+        TEMP: 0
+        A:    0
+        B:    1
 """
 
 fun main() {
@@ -41,24 +44,26 @@ fun main() {
     println(asm.symbolTable)
     println()
 
-    println("Writing Data:")
-    for ((name, value) in asm.data) {
-        println(name to value to asm.symbolTable[name]!!)
-        memory.store(asm.symbolTable[name]!!, value)
+    println("Writing instructions:")
+    asm.instructions.forEachIndexed { ptr, (op, addr) ->
+        val bin = op + addr.value
+        println(bin.toString(2).padEnd(16, '0'))
+        memory.store(Address.Raw(ptr), bin)
     }
     println()
 
-    println("Writing instructions:")
-    asm.instructions.forEachIndexed { ptr, (op, addr) ->
-        println((op + addr.value).toString(2).padEnd(16, '0'))
-        memory.store(Address.Raw(ptr), op + addr.value)
+    println("Writing Data:")
+    for (data in asm.data) {
+        val bin = data.value
+        println(bin.toString(2).padStart(16, '0'))
+        memory.store(data.addr, bin)
     }
     println()
 
     println("Starting Execution:")
     val controlUnit = ControlUnit(
         memory = memory,
-        debug = true
+        debug = false
     )
     try {
         while (true) {
