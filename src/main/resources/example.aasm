@@ -1,0 +1,21 @@
+        IN    MAX
+START:  OUT   A
+        LOAD  B
+        STORE TEMP
+        ADD   A
+        STORE B
+
+        LOAD  TEMP
+        STORE A
+
+        COMP  MAX
+        JMPLT END
+
+        JMP   START
+
+END:    HALT
+
+        MAX:  .DATA 0
+        TEMP: .DATA 0
+        A:    .DATA 0
+        B:    .DATA 1

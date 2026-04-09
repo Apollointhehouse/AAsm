@@ -5,48 +5,32 @@ import dev.apollointhehouse.execution.ControlUnit
 import dev.apollointhehouse.execution.HaltException
 import dev.apollointhehouse.execution.Memory
 import dev.apollointhehouse.parsing.Parser
+import kotlin.io.path.Path
+import kotlin.io.path.readText
 
-// Fibonacci example
-const val example = """
-        IN    MAX
-START:  OUT   A
-        LOAD  B
-        STORE TEMP
-        ADD   A
-        STORE B
+private val hexFormat = HexFormat {
+    upperCase = true
+    number {
+        removeLeadingZeros = true
+        minLength = 4
+    }
+}
 
-        LOAD  TEMP
-        STORE A
+fun main(vararg args: String) {
+    if (args.isEmpty()) {
+        throw IllegalArgumentException("Please provide the location of an AAsm program as an argument")
+    }
 
-        COMP  MAX
-        JMPLT END
+    val input = Path(args.first())
+        .readText()
 
-        JMP   START
-
-END:    HALT
-
-        MAX:  .DATA 0
-        TEMP: .DATA 0
-        A:    .DATA 0
-        B:    .DATA 1
-"""
-
-fun main() {
     val parser = Parser()
     val memory = Memory(
         memory =  Array(4096) { 0 }
     )
 
-    val hexFormat = HexFormat {
-        upperCase = true
-        number {
-            removeLeadingZeros = true
-            minLength = 4
-        }
-    }
-
     println("Parsing:")
-    val asm = parser.parseASM(example)
+    val asm = parser.parseASM(input)
 
     println("Instructions:")
     println(asm)
