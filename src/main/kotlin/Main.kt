@@ -31,14 +31,16 @@ fun main(vararg args: String) {
 
     println("Parsing:")
     val asm = parser.parseASM(input)
-
-    println("Instructions:")
-    println(asm)
     println()
 
     println("Symbol Table:")
     println(asm.symbolTable)
     println()
+
+    println("Instructions:")
+    println(asm)
+    println()
+
 
     println("Writing instructions:")
     asm.instructions.forEachIndexed { ptr, (bin) ->
