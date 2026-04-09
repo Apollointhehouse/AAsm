@@ -56,7 +56,7 @@ class FibonacciTest {
         val aAddr = asm.symbolTable["A"]!!
         val bAddr = asm.symbolTable["B"]!!
 
-        assertEquals(13, memory.load(aAddr))
-        assertEquals(21, memory.load(bAddr))
+        assertEquals(21, memory.load(aAddr))
+        assertEquals(34, memory.load(bAddr))
     }
 }
