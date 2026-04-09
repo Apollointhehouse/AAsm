@@ -25,10 +25,10 @@ START:  OUT   A
 
 END:    HALT
 
-        MAX:  0
-        TEMP: 0
-        A:    0
-        B:    1
+        MAX:  .DATA 0
+        TEMP: .DATA 0
+        A:    .DATA 0
+        B:    .DATA 1
 """
 
 fun main() {
@@ -37,26 +37,29 @@ fun main() {
         memory =  Array(1024) { 0 }
     )
 
+    val hexFormat = HexFormat {
+        upperCase = true
+        number {
+            removeLeadingZeros = true
+            minLength = 4
+        }
+    }
+
     println("Parsing:")
     val asm = parser.parseASM(example)
 
+    println("Instructions:")
     println(asm)
+    println()
+
+    println("Symbol Table:")
     println(asm.symbolTable)
     println()
 
     println("Writing instructions:")
-    asm.instructions.forEachIndexed { ptr, (op, addr) ->
-        val bin = op + addr.value
-        println(bin.toString(2).padEnd(16, '0'))
+    asm.instructions.forEachIndexed { ptr, (bin) ->
+        println(bin.toBinString(16) + " | " + bin.toHexString(hexFormat))
         memory.store(Address.Raw(ptr), bin)
-    }
-    println()
-
-    println("Writing Data:")
-    for (data in asm.data) {
-        val bin = data.value
-        println(bin.toString(2).padStart(16, '0'))
-        memory.store(data.addr, bin)
     }
     println()
 

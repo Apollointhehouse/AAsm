@@ -21,7 +21,10 @@ enum class OpCode(val code: Int) {
     operator fun plus(addr: Int) = code or addr
 
     companion object {
-        fun from(name: String): OpCode =
-            entries.first { it.name == name }
+        fun from(name: String): OpCode? =
+            entries.find { it.name == name }
+
+        fun from(index: Int): OpCode? =
+            entries.getOrNull(index)
     }
 }

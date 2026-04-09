@@ -4,6 +4,14 @@ import dev.apollointhehouse.asm.Address
 import dev.apollointhehouse.asm.OpCode
 import dev.apollointhehouse.asm.OpCode.*
 
+private val hexFormat = HexFormat {
+    upperCase = true
+    number {
+        removeLeadingZeros = true
+        minLength = 3
+    }
+}
+
 class ControlUnit(
     private val memory: Memory,
     private val debug: Boolean = false
@@ -16,7 +24,7 @@ class ControlUnit(
         val data  = fetch()
         val (opCode, addr) = decode(data)
 
-        if (debug) println("OP: $opCode, ADDR: ${addr.value.toString(16).padEnd(3, '0')}".uppercase())
+        if (debug) println("OP: $opCode, ADDR: ${addr.value.toHexString(hexFormat)}")
 
         execute(opCode, addr)
 

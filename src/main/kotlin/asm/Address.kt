@@ -14,7 +14,7 @@ sealed interface Address {
     }
     data class Named(val name: String) : Address {
         override fun resolve(symbolTable: Map<String, Raw>): Raw =
-            symbolTable[name]!!
+            symbolTable.getOrElse(name) { throw IllegalArgumentException("Could not resolve name $name") }
     }
 
     fun resolve(symbolTable: Map<String, Raw>): Raw

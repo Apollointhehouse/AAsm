@@ -2,7 +2,6 @@ package dev.apollointhehouse.parsing
 
 import dev.apollointhehouse.asm.ASM
 import dev.apollointhehouse.asm.Address
-import dev.apollointhehouse.asm.Data
 import dev.apollointhehouse.asm.Instruction
 import dev.apollointhehouse.asm.OpCode
 import kotlin.collections.map
@@ -12,65 +11,77 @@ class Parser {
 
     fun parseASM(asm: String): ASM {
         val lines = asm
-            .trimIndent()
             .split("\n")
-            .map { it.trim() }
+            .map { it.substringBefore(";").trim() } // Support comments
             .filter { it.isNotEmpty() }
 
-        val split = lines.indexOfFirst { "HALT" in it } + 1
 
-        val instructions = parseInstructions(lines.subList(0, split))
-        val data = parseData(lines.subList(split, lines.size), instructions.size)
+        val instructions = parseInstructions(lines)
 
-        val resolved = instructions.map { (opCode, addr) ->
-            Instruction(opCode, addr.resolve(symbolTable))
-        }
-
-        return ASM(resolved, data, symbolTable)
+        return ASM(instructions, symbolTable)
     }
 
     private fun parseInstructions(
         instructions: List<String>
-    ): List<Instruction<Address>> {
-        val result = instructions.mapIndexed { index, line ->
+    ): List<Instruction> {
+        instructions.forEachIndexed { index, line ->
             val values = line
-                .split(" ", ":")
+                .split(" ", ":", ".DATA")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+
+            if (line.contains(":")) {
+                symbolTable[values[0]] = Address.Raw(index)
+            }
+        }
+
+        val result = instructions.map { line ->
+            val values = line
+                .split(" ", ":", ".DATA")
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
 
             if (values.isEmpty()) throw IllegalStateException("No instructions found")
 
             var start = 0
-
             if (line.contains(":")) {
-                symbolTable[values[start++]] = Address.Raw(index)
+                start++ // Skip label
             }
 
-            val opCode = OpCode.from(values[start++])
+            if (line.contains(".DATA")) {
+                val data = values[start]
+                    .toInt()
+
+                return@map Instruction(data)
+            }
+
+            var bin = 0
 
             if (values.size > start) {
-                val addr: Address = values[start]
-                    .toIntOrNull()
-                    ?.let { Address.Raw(it) }
-                    ?: Address.Named(values[start])
+                val value = values[start]
+                val opCode = OpCode.from(value)
+                    ?: value.toIntOrNull()
+                    ?.let { OpCode.from(it) }
+                    ?: throw IllegalStateException("No OP code found")
 
-                return@mapIndexed Instruction(opCode, addr)
+                bin += opCode.code
+
+                start++
             }
 
-            Instruction(opCode, Address.Raw(0))
+            if (values.size > start) {
+                val value = values[start]
+                val addr = value
+                    .toIntOrNull()
+                    ?.let { Address.Raw(it) }
+                    ?: Address.Named(value)
+
+                bin += addr.resolve(symbolTable).value
+            }
+
+            Instruction(bin)
         }
 
         return result
-    }
-
-    private fun parseData(data: List<String>, memStart: Int): List<Data> = data.mapIndexed { index, line ->
-        val (name, value) = line
-            .split(":")
-            .map { it.trim() }
-
-        val addr =  Address.Raw(memStart + index)
-        symbolTable[name] = addr
-
-        Data(name, value.toInt(), addr)
     }
 }
