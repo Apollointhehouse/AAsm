@@ -12,7 +12,7 @@ class Parser {
     fun parseASM(asm: String): ASM {
         val lines = asm
             .split("\n")
-            .map { it.substringBefore(";").trim() } // Support comments
+            .map { it.substringBefore(";").trim() }
             .filter { it.isNotEmpty() }
 
 
@@ -35,7 +35,7 @@ class Parser {
             }
         }
 
-        val result = instructions.map { line ->
+        val result = instructions.mapIndexed { index, line ->
             val values = line
                 .split(" ", ":", ".DATA")
                 .map { it.trim() }
@@ -52,9 +52,9 @@ class Parser {
                 val data = values[start]
 
                 try {
-                    return@map Instruction(data.hexToInt())
+                    return@mapIndexed Instruction(data.hexToInt())
                 } catch (_: Exception) {
-                    throw IllegalStateException("Failed to parse hex!")
+                    throw IllegalStateException("Failed to parse hex at lineL $index}")
                 }
             }
 
@@ -66,7 +66,7 @@ class Parser {
                     ?: try {
                         OpCode.from(value.hexToInt())!!
                     } catch (_: Exception) {
-                        throw IllegalStateException("No OP code found")
+                        throw IllegalStateException("No OP code found at line: $index")
                     }
 
                 bin += opCode.code

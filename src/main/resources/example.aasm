@@ -15,7 +15,7 @@ START:  OUT   A
 
 END:    HALT
 
-        MAX:  .DATA 0
-        TEMP: .DATA 0
-        A:    .DATA 0
-        B:    .DATA 1
+MAX:   .DATA 0
+TEMP:  .DATA 0
+A:     .DATA 0
+B:     .DATA 1
