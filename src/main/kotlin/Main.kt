@@ -34,7 +34,7 @@ END:    HALT
 fun main() {
     val parser = Parser()
     val memory = Memory(
-        memory =  Array(1024) { 0 }
+        memory =  Array(4096) { 0 }
     )
 
     val hexFormat = HexFormat {
