@@ -36,7 +36,7 @@ The architecture uses 16-bit words:
 
 ## Example Program (Fibonacci)
 
-```asm
+```
         IN    MAX
 START:  OUT   A
         LOAD  B

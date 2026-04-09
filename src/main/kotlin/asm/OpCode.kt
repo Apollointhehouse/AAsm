@@ -24,7 +24,7 @@ enum class OpCode(val code: Int) {
         fun from(name: String): OpCode? =
             entries.find { it.name == name }
 
-        fun from(index: Int): OpCode? =
-            entries.getOrNull(index)
+        fun from(code: Int): OpCode? =
+            entries.find { it.code == code }
     }
 }

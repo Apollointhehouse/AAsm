@@ -50,9 +50,12 @@ class Parser {
 
             if (line.contains(".DATA")) {
                 val data = values[start]
-                    .toInt()
 
-                return@map Instruction(data)
+                try {
+                    return@map Instruction(data.hexToInt())
+                } catch (_: Exception) {
+                    throw IllegalStateException("Failed to parse hex!")
+                }
             }
 
             var bin = 0
@@ -60,9 +63,11 @@ class Parser {
             if (values.size > start) {
                 val value = values[start]
                 val opCode = OpCode.from(value)
-                    ?: value.toIntOrNull()
-                    ?.let { OpCode.from(it) }
-                    ?: throw IllegalStateException("No OP code found")
+                    ?: try {
+                        OpCode.from(value.hexToInt())!!
+                    } catch (_: Exception) {
+                        throw IllegalStateException("No OP code found")
+                    }
 
                 bin += opCode.code
 
