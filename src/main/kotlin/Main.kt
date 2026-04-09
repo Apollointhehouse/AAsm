@@ -30,6 +30,7 @@ fun main(vararg args: String) {
     )
 
     println("Parsing:")
+    println(input)
     val asm = parser.parseASM(input)
     println()
 
