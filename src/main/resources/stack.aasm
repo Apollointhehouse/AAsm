@@ -1,23 +1,33 @@
-MAIN:          OUT INDEX   ; Current Index
-               LOAD MAIN_RET_PUSH
+; This program will take integers as input until it receives -1
+; From there it will pop and print all the values
+
+MAIN_PUSH:     LOAD MAIN_RET_PUSH
                STORE R_ADR
 
                IN INPUT
                LOAD INPUT
                STORE P_VALUE
+               LOAD P_VALUE
+               COMP ZERO
+               JMPGT MAIN_POP
 
                JMP SUB_PUSH ; Push input onto stack
 MAIN_RET_PUSH: 0 MAIN_RET_PUSH
+               JMP MAIN_PUSH
 
-               OUT INDEX   ; Current Index
-               LOAD MAIN_RET_POP
+MAIN_POP:      LOAD MAIN_RET_POP
                STORE R_ADR
+
+               LOAD INDEX
+               COMP MAX_INDEX
+               JMPEQ MAIN_POP_END
+               JMPLT MAIN_POP_END
 
                JMP SUB_POP ; Pop input from stack
 MAIN_RET_POP:  0 MAIN_RET_POP
                OUT R_VALUE ; Popped value
-
-               JMP END
+               JMP MAIN_POP
+MAIN_POP_END:  JMP END
 
 
 ; ___PUSH_SUB___
@@ -74,8 +84,10 @@ I_STORE: STORE 0
 I_JMP:   JMP   0
 I_CLEAR: CLEAR 0
 
-R_ADR:     0    END
-R_VALUE:  .DATA 0
-P_VALUE:  .DATA 0
+R_ADR:      0    END
+R_VALUE:   .DATA 0
+P_VALUE:   .DATA 0
 
-INDEX:    .DATA FFF
+ZERO:      .DATA 0
+MAX_INDEX: .DATA FFF
+INDEX:     .DATA FFF
