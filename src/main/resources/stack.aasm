@@ -77,14 +77,14 @@ I_JMP_POP:   JMP   0
 
 END:       HALT
 
-INPUT:  .DATA 0
+INPUT:  .DATA  0
 
 I_LOAD:  LOAD  0
 I_STORE: STORE 0
 I_JMP:   JMP   0
 I_CLEAR: CLEAR 0
 
-R_ADR:      0    END
+R_ADR:      LOAD END
 R_VALUE:   .DATA 0
 P_VALUE:   .DATA 0
 
