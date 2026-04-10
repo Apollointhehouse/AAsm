@@ -4,21 +4,49 @@ import dev.apollointhehouse.asm.ASM
 import dev.apollointhehouse.asm.Address
 import dev.apollointhehouse.asm.Instruction
 import dev.apollointhehouse.asm.OpCode
+import java.nio.file.Path
 import kotlin.collections.map
+import kotlin.io.path.div
+import kotlin.io.path.readText
 
 class Parser {
     private val symbolTable = mutableMapOf<String, Address.Raw>()
 
-    fun parseASM(asm: String): ASM {
-        val lines = asm
-            .split("\n")
-            .map { it.substringBefore(";").trim() }
-            .filter { it.isNotEmpty() }
+    fun parseASM(asm: String, parentDir: Path = Path.of(".")): ASM {
+        val lines = preprocess(asm, parentDir)
+        println()
+        println("Preprocessing ASM")
+        println(lines.joinToString("\n"))
+        println()
 
 
         val instructions = parseInstructions(lines)
 
         return ASM(instructions, symbolTable)
+    }
+
+    private fun preprocess(asm: String, parent: Path): List<String> {
+        return asm
+            .split("\n")
+            .flatMap { line ->
+                if ("#include" in line) tryLink(line, parent) else listOf(line)
+            }
+            .map { it.substringBefore(";").trim() }
+            .filter { it.isNotEmpty() }
+    }
+
+    private fun tryLink(include: String, parent: Path): List<String> {
+        val values = include
+            .split(" ", "#include")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+
+        if (values.size != 1) {
+            return listOf(include)
+        }
+
+        val asmPath = parent / values[0]
+        return preprocess(asmPath.readText(), parent)
     }
 
     private fun parseInstructions(

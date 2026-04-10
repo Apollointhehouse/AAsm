@@ -21,6 +21,7 @@ fun main(vararg args: String) {
         throw IllegalArgumentException("Please provide the location of an AAsm program as an argument")
     }
 
+    val parent = Path(args.first()).parent
     val input = Path(args.first())
         .readText()
 
@@ -31,7 +32,7 @@ fun main(vararg args: String) {
 
     println("Parsing:")
     println(input)
-    val asm = parser.parseASM(input)
+    val asm = parser.parseASM(input, parent)
     println()
 
     println("Symbol Table:")
