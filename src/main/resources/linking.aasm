@@ -1,5 +1,0 @@
-#include example.aasm
-
-FIB_END: LOAD 0
-
-#include stack.aasm

@@ -5,48 +5,69 @@ import dev.apollointhehouse.execution.ControlUnit
 import dev.apollointhehouse.execution.HaltException
 import dev.apollointhehouse.execution.Memory
 import dev.apollointhehouse.parsing.Parser
-import kotlin.io.path.Path
-import kotlin.io.path.readText
+import dev.apollointhehouse.Mode.*
+import dev.apollointhehouse.asm.Instruction
+import dev.apollointhehouse.parsing.Linker
+import kotlin.io.path.*
 
-private val hexFormat = HexFormat {
-    upperCase = true
-    number {
-        removeLeadingZeros = true
-        minLength = 4
+fun main(args: Array<String>) {
+    val mode = Mode.getByCode(args.getOrElse(0) { throw IllegalArgumentException("Must provide a mode!") })
+
+    when (mode) {
+        Execute -> {
+            val input = Path(args.getOrElse(1) { throw IllegalArgumentException("Must provide input path for aaexe file!") })
+            val instructions = readAAEXE(input)
+            execute(instructions)
+        }
+        Assemble -> {
+            val output = Path(args.getOrElse(1) { throw IllegalArgumentException("Must provide output path for write file!") })
+            val parent = output.parent
+            val files = args
+                .drop(2)
+                .map { parent / it }
+                .takeIf { it.isNotEmpty() }
+                ?: throw IllegalArgumentException("Must provide aasm files for write file!")
+
+            val parsedFiles = files.map { file ->
+                val text = file
+                    .readText()
+                val parser = Parser()
+
+                println()
+                println("Parsing ${file.name}:")
+                parser.parse(text)
+            }
+
+            println()
+            println("Linking:")
+            val linker = Linker(parsedFiles)
+            val instructions = linker.link()
+
+            writeAAEXE(instructions, output)
+        }
     }
 }
 
-fun main(vararg args: String) {
-    if (args.isEmpty()) {
-        throw IllegalArgumentException("Please provide the location of an AAsm program as an argument")
-    }
-
-    val parent = Path(args.first()).parent
-    val input = Path(args.first())
-        .readText()
-
-    val parser = Parser()
+private fun execute(instructions: List<Instruction.Raw>) {
     val memory = Memory(
         memory =  Array(4096) { 0 }
     )
 
-    println("Parsing:")
-    println(input)
-    val asm = parser.parseASM(input, parent)
-    println()
-
-    println("Symbol Table:")
-    println(asm.symbolTable)
-    println()
-
     println("Instructions:")
-    println(asm)
+    println(instructions)
     println()
 
+    val hexFormat = HexFormat {
+        upperCase = true
+        number {
+            removeLeadingZeros = true
+            minLength = 4
+        }
+    }
 
-    println("Writing instructions:")
-    asm.instructions.forEachIndexed { ptr, (bin) ->
-        println(bin.toBinString(16) + " | " + bin.toHexString(hexFormat))
+    println("Writing instructions to memory:")
+    instructions.forEachIndexed { ptr, (bin) ->
+        println("$ptr : ${bin.toBinString(16)} | ${bin.toHexString(hexFormat)}")
         memory.store(Address.Raw(ptr), bin)
     }
     println()

@@ -1,5 +1,6 @@
 package dev.apollointhehouse
 
+import dev.apollointhehouse.parsing.Linker
 import dev.apollointhehouse.parsing.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,7 +32,10 @@ class DataResolutionTest {
                 B:    .DATA 1
         """
         val parser = Parser()
-        val asm = parser.parseASM(example)
+        val asm = parser.parse(example)
+
+        val linker = Linker(listOf(asm))
+        val instructions = linker.link()
         
         // Data:
         // 12: .DATA 0
@@ -40,9 +44,9 @@ class DataResolutionTest {
         // 15: .DATA 1
 
         // Check resolved data
-        assertEquals(0, asm.instructions[12].bin) // 0
-        assertEquals(0, asm.instructions[13].bin) // 0
-        assertEquals(0, asm.instructions[14].bin) // 0
-        assertEquals(1, asm.instructions[15].bin) // 1
+        assertEquals(0, instructions[12].bin) // 0
+        assertEquals(0, instructions[13].bin) // 0
+        assertEquals(0, instructions[14].bin) // 0
+        assertEquals(1, instructions[15].bin) // 1
     }
 }

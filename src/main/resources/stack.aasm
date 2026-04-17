@@ -1,6 +1,7 @@
 ; This program will take integers as input until it receives -1
 ; From there it will pop and print all the values
 
+STACK_START:   LOAD 0
 MAIN_PUSH:     LOAD MAIN_RET_PUSH
                STORE R_ADR
 
@@ -20,14 +21,15 @@ MAIN_POP:      LOAD MAIN_RET_POP
 
                LOAD INDEX
                COMP MAX_INDEX
-               JMPEQ MAIN_POP_END
-               JMPLT MAIN_POP_END
+               JMPEQ STACK_END
+               JMPLT STACK_END
 
                JMP SUB_POP ; Pop input from stack
 MAIN_RET_POP:  0 MAIN_RET_POP
                OUT R_VALUE ; Popped value
                JMP MAIN_POP
-MAIN_POP_END:  HALT
+
+STACK_END:     HALT
 
 
 ; ___PUSH_SUB___

@@ -4,6 +4,7 @@ import dev.apollointhehouse.asm.Address
 import dev.apollointhehouse.execution.ControlUnit
 import dev.apollointhehouse.execution.HaltException
 import dev.apollointhehouse.execution.Memory
+import dev.apollointhehouse.parsing.Linker
 import dev.apollointhehouse.parsing.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,10 +36,13 @@ class FibonacciTest {
         """
 
         val parser = Parser()
-        val asm = parser.parseASM(program)
+        val asm = parser.parse(program)
         val memory = Memory(Array(1024) { 0 })
 
-        asm.instructions.forEachIndexed { ptr, (bin) ->
+        val linker = Linker(listOf(asm))
+        val instructions = linker.link()
+
+        instructions.forEachIndexed { ptr, (bin) ->
             memory.store(Address.Raw(ptr), bin)
         }
 
@@ -53,8 +57,8 @@ class FibonacciTest {
         } catch (_: HaltException) {
         }
         
-        val aAddr = asm.symbolTable["A"]!!
-        val bAddr = asm.symbolTable["B"]!!
+        val aAddr = Address.Raw(13)
+        val bAddr = Address.Raw(14)
 
         assertEquals(21, memory.load(aAddr))
         assertEquals(34, memory.load(bAddr))
