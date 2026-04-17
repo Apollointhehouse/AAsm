@@ -67,15 +67,15 @@ B:      .DATA 1
 To assemble one or more `.aasm` files into a single `.aaexe` executable:
 
 ```powershell
-./gradlew run --args="ASSEMBLE <output_path> <aasm_file1> <aasm_file2> ..."
+java -jar AAsm.jar ASSEMBLE <output_path> <aasm_file1> <aasm_file2> ...
 ```
 
-- **`<output_path>`**: The path to the output `.aaexe` file (the extension will be added automatically).
+- **`<output_path>`**: The path to the output `.aaexe` file.
 - **`<aasm_file>`**: The names of the source `.aasm` files, located in the same directory as the output path.
 
 Example:
 ```powershell
-./gradlew run --args="ASSEMBLE src/main/resources/output.aaexe fib.aasm link_fib_stack.aasm stack.aasm"
+java -jar AAsm.jar ASSEMBLE output.aaexe fib.aasm link_fib_stack.aasm stack.aasm
 ```
 
 ### Executing an `.aaexe` file
@@ -83,10 +83,10 @@ Example:
 To run an assembled `.aaexe` file:
 
 ```powershell
-./gradlew run --args="EXECUTE <aaexe_path>"
+java -jar AAsm.jar EXECUTE <aaexe_path>
 ```
 
 Example:
 ```powershell
-./gradlew run --args="EXECUTE src/main/resources/output.aaexe"
+java -jar AAsm.jar EXECUTE output.aaexe
 ```
