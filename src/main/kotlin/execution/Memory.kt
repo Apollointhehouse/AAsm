@@ -2,11 +2,11 @@ package dev.apollointhehouse.execution
 
 import dev.apollointhehouse.asm.Address
 
-data class Memory(private val memory: Array<Int> = Array(256) { 0 }) {
+data class Memory(private val memory: Array<Short> = Array(256) { 0 }) {
 
-    fun load(address: Address.Raw): Int = memory[address.value]
-    fun store(address: Address.Raw, value: Int): Address.Raw {
-        memory[address.value] = value
+    fun load(address: Address.Raw): Short = memory[address.value.toUShort().toInt()]
+    fun store(address: Address.Raw, value: Short): Address.Raw {
+        memory[address.value.toUShort().toInt()] = value
         return address
     }
 

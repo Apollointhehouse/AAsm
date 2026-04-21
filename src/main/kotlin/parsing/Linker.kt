@@ -10,7 +10,7 @@ class Linker(val parsed: List<ASM>) {
         val combined = mutableMapOf<String, Address.Raw>()
 
         for (asm in parsed) {
-            val symbolTable = asm.symbolTable.mapValues { (_, address) -> Address.Raw(address.value + p) }
+            val symbolTable = asm.symbolTable.mapValues { (_, address) -> Address.Raw((address.value + p).toShort()) }
             combined.putAll(symbolTable)
             p += asm.instructions.size
         }
@@ -25,14 +25,16 @@ class Linker(val parsed: List<ASM>) {
             when (instr) {
                 is Instruction.Raw -> instr
                 is Instruction.Parsed -> {
-                    Instruction.Raw(instr.opCode.code + instr.addr.resolve(combined).value)
+                    Instruction.Raw((instr.opCode.code + instr.addr.resolve(combined).value).toShort())
                 }
             }
         }
 
         println()
         println("Raw Instructions:")
-        println(raw)
+        for (intr in raw) {
+            println(intr)
+        }
 
         return raw
     }

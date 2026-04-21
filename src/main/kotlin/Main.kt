@@ -11,16 +11,22 @@ import dev.apollointhehouse.parsing.Linker
 import kotlin.io.path.*
 
 fun main(args: Array<String>) {
-    val mode = Mode.getByCode(args.getOrElse(0) { throw IllegalArgumentException("Must provide a mode!") })
+    val iter = args.iterator()
+    val mode = Mode.getByCode(iter.nextOr { throw IllegalArgumentException("Must provide a mode!") })
 
     when (mode) {
         Execute -> {
-            val input = Path(args.getOrElse(1) { throw IllegalArgumentException("Must provide input path for aaexe file!") })
+            val input = Path(iter.nextOr { throw IllegalArgumentException("Must provide input path for aaexe file!") })
             val instructions = readAAEXE(input)
             execute(instructions)
         }
+        Debug -> {
+            val input = Path(iter.nextOr { throw IllegalArgumentException("Must provide input path for aaexe file!") })
+            val instructions = readAAEXE(input)
+            execute(instructions, debug = true)
+        }
         Assemble -> {
-            val output = Path(args.getOrElse(1) { throw IllegalArgumentException("Must provide output path for write file!") })
+            val output = Path(iter.nextOr { throw IllegalArgumentException("Must provide output path for write file!") })
             val parent = output.parent
             val files = args
                 .drop(2)
@@ -48,7 +54,7 @@ fun main(args: Array<String>) {
     }
 }
 
-private fun execute(instructions: List<Instruction.Raw>) {
+private fun execute(instructions: List<Instruction.Raw>, debug: Boolean = false) {
     val memory = Memory(
         memory =  Array(4096) { 0 }
     )
@@ -67,15 +73,15 @@ private fun execute(instructions: List<Instruction.Raw>) {
 
     println("Writing instructions to memory:")
     instructions.forEachIndexed { ptr, (bin) ->
-        println("$ptr : ${bin.toBinString(16)} | ${bin.toHexString(hexFormat)}")
-        memory.store(Address.Raw(ptr), bin)
+        println("${":%04d".format(ptr)} : ${bin.toUShort().toInt().toBinString(16)} | ${bin.toUShort().toInt().toHexString(hexFormat)}")
+        memory.store(Address.Raw(ptr.toShort()), bin)
     }
     println()
 
     println("Starting Execution:")
     val controlUnit = ControlUnit(
         memory = memory,
-        debug = false
+        debug = debug
     )
     try {
         while (true) {

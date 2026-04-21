@@ -43,7 +43,7 @@ class FibonacciTest {
         val instructions = linker.link()
 
         instructions.forEachIndexed { ptr, (bin) ->
-            memory.store(Address.Raw(ptr), bin)
+            memory.store(Address.Raw(ptr.toShort()), bin)
         }
 
         // Let's check the memory after HALT

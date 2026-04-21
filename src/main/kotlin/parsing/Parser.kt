@@ -36,7 +36,7 @@ class Parser {
                 .filter { it.isNotEmpty() }
 
             if (line.contains(":")) {
-                symbolTable[values[0]] = Address.Raw(index)
+                symbolTable[values[0]] = Address.Raw(index.toShort())
             }
         }
         println()
@@ -60,7 +60,7 @@ class Parser {
                 val data = values[start]
 
                 try {
-                    return@mapIndexed Instruction.Raw(data.hexToInt())
+                    return@mapIndexed Instruction.Raw(data.hexToShort())
                 } catch (_: Exception) {
                     throw IllegalStateException("Failed to parse hex at lineL $index}")
                 }
@@ -72,7 +72,7 @@ class Parser {
                 val value = values[start]
                 opCode = OpCode.from(value)
                     ?: try {
-                        OpCode.from(value.hexToInt())!!
+                        OpCode.from(value.hexToShort().toInt())!!
                     } catch (_: Exception) {
                         throw IllegalStateException("No OP code found at line: $index")
                     }
@@ -85,7 +85,7 @@ class Parser {
             if (values.size > start) {
                 val value = values[start]
                 addr = value
-                    .toIntOrNull()
+                    .toShortOrNull()
                     ?.let { Address.Raw(it) }
                     ?: Address.Named(value)
             }

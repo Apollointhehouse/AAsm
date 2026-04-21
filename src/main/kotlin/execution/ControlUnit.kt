@@ -4,11 +4,19 @@ import dev.apollointhehouse.asm.Address
 import dev.apollointhehouse.asm.OpCode
 import dev.apollointhehouse.asm.OpCode.*
 
-private val hexFormat = HexFormat {
+private val hexFormatAddr = HexFormat {
     upperCase = true
     number {
         removeLeadingZeros = true
         minLength = 3
+    }
+}
+
+private val hexFormatReg = HexFormat {
+    upperCase = true
+    number {
+        removeLeadingZeros = true
+        minLength = 4
     }
 }
 
@@ -17,28 +25,28 @@ class ControlUnit(
     private val debug: Boolean = false
 ) {
     private val programCounter = ProgramCounter(memory)
-    private var register: Int = 0
+    private var register: Short = 0
     private var cRegister: Int = 0
 
     fun clock() {
         val data  = fetch()
-        val (opCode, addr) = decode(data)
+        val (opCode, addr) = decode(data.toInt())
 
-        if (debug) println("OP: $opCode, ADDR: ${addr.value.toHexString(hexFormat)}")
+        if (debug) println("OP: $opCode, ADDR: ${addr.value.toHexString(hexFormatAddr)}, REG: ${register.toHexString(hexFormatReg)}")
 
         execute(opCode, addr)
 
         programCounter.clock()
     }
 
-    private fun fetch(): Int {
+    private fun fetch(): Short {
         return programCounter.load()
     }
 
     private fun decode(data: Int): Pair<OpCode, Address.Raw> {
         val opCodeValue = data and 0xF000
         val opCode = OpCode.entries.find { it.code == opCodeValue } ?: throw IllegalStateException("Unknown OpCode: $opCodeValue")
-        val addr   = Address.Raw(data and 0x0FFF)
+        val addr   = Address.Raw((data and 0x0FFF).toShort())
 
         return opCode to addr
     }
@@ -55,16 +63,16 @@ class ControlUnit(
                 memory.store(addr, 0)
             }
             ADD -> {
-                register = (register + memory.load(addr))
+                register = (register + memory.load(addr)).toShort()
             }
             INC -> {
-                memory.store(addr, register + 1)
+                memory.store(addr, (memory.load(addr) + 1).toShort())
             }
             SUB -> {
-                register = (register - memory.load(addr))
+                register = (register - memory.load(addr)).toShort()
             }
             DEC -> {
-                memory.store(addr, register - 1)
+                memory.store(addr, (memory.load(addr) - 1).toShort())
             }
             COMP -> {
                 val x = memory.load(addr)
@@ -100,7 +108,7 @@ class ControlUnit(
                 }
             }
             IN -> {
-                memory.store(addr, readln().toInt())
+                memory.store(addr, readln().toShort())
             }
             OUT -> {
                 println(memory.load(addr))

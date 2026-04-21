@@ -24,7 +24,7 @@ fun readAAEXE(input: Path): List<Instruction.Raw> {
         val size = f.readUnsignedShort()
 
         repeat(size) {
-            instructions += Instruction.Raw(f.readUnsignedShort())
+            instructions += Instruction.Raw(f.readUnsignedShort().toShort())
         }
     }
 
@@ -45,7 +45,12 @@ fun writeAAEXE(
     DataOutputStream(file.outputStream(StandardOpenOption.TRUNCATE_EXISTING)).use {
         it.writeShort(instructions.size)
         for ((bin) in instructions) {
-            it.writeShort(bin)
+            it.writeShort(bin.toInt())
         }
     }
+}
+
+fun <T> Iterator<T>.nextOr(block: () -> T): T {
+    if (!hasNext()) return block()
+    return next()
 }
