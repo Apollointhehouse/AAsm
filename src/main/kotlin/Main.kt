@@ -1,14 +1,20 @@
 package dev.apollointhehouse
 
+import dev.apollointhehouse.Mode.*
 import dev.apollointhehouse.asm.Address
+import dev.apollointhehouse.asm.Instruction
 import dev.apollointhehouse.execution.ControlUnit
 import dev.apollointhehouse.execution.HaltException
 import dev.apollointhehouse.execution.Memory
-import dev.apollointhehouse.parsing.Parser
-import dev.apollointhehouse.Mode.*
-import dev.apollointhehouse.asm.Instruction
+import dev.apollointhehouse.parsing.IO.readAAEXE
+import dev.apollointhehouse.parsing.IO.writeAAEXE
+import dev.apollointhehouse.parsing.IO.writeAASM
 import dev.apollointhehouse.parsing.Linker
-import kotlin.io.path.*
+import dev.apollointhehouse.parsing.Parser
+import kotlin.io.path.Path
+import kotlin.io.path.div
+import kotlin.io.path.name
+import kotlin.io.path.readText
 
 fun main(args: Array<String>) {
     val iter = args.iterator()
@@ -18,12 +24,8 @@ fun main(args: Array<String>) {
         Execute -> {
             val input = Path(iter.nextOr { throw IllegalArgumentException("Must provide input path for aaexe file!") })
             val instructions = readAAEXE(input)
-            execute(instructions)
-        }
-        Debug -> {
-            val input = Path(iter.nextOr { throw IllegalArgumentException("Must provide input path for aaexe file!") })
-            val instructions = readAAEXE(input)
-            execute(instructions, debug = true)
+            val debug = iter.nextOr { null }.equals("Debug", true)
+            execute(instructions, debug)
         }
         Assemble -> {
             val output = Path(iter.nextOr { throw IllegalArgumentException("Must provide output path for write file!") })
@@ -51,8 +53,16 @@ fun main(args: Array<String>) {
 
             writeAAEXE(instructions, output)
         }
+        Disassemble -> {
+            val input = Path(iter.nextOr { throw IllegalArgumentException("Must provide input path for aaexe file!") })
+            val instructions = readAAEXE(input)
+
+            writeAASM(instructions, input)
+        }
     }
 }
+
+
 
 private fun execute(instructions: List<Instruction.Raw>, debug: Boolean = false) {
     val memory = Memory(

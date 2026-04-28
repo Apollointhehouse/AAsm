@@ -23,12 +23,12 @@ The architecture uses 16-bit instructions:
 | ADD   | 0x3000 | R = R + value at address                          |
 | INC   | 0x4000 | Increment value in R and store at address         |
 | SUB   | 0x5000 | R = R - value at address                          |
-| DEC   | 0x6000 | Decrement value in R and store at  address        |
+| DEC   | 0x6000 | Decrement value in R and store at address         |
 | COMP  | 0x7000 | Compare R with value at address (sets C register) |
 | JMP   | 0x8000 | Jump to address                                   |
-| JMPGT | 0x9000 | Jump if value >  R (from last COMP)               |
+| JMPGT | 0x9000 | Jump if value > R (from last COMP)                |
 | JMPEQ | 0xA000 | Jump if value == R (from last COMP)               |
-| JMPLT | 0xB000 | Jump if value <  R (from last COMP)               |
+| JMPLT | 0xB000 | Jump if value < R (from last COMP)                |
 | JMPNE | 0xC000 | Jump if value != R (from last COMP)               |
 | IN    | 0xD000 | Read integer from stdin into address              |
 | OUT   | 0xE000 | Print value at address to stdout                  |
@@ -83,10 +83,35 @@ java -jar AAsm.jar ASSEMBLE output.aaexe fib.aasm link_fib_stack.aasm stack.aasm
 To run an assembled `.aaexe` file:
 
 ```powershell
-java -jar AAsm.jar EXECUTE <aaexe_path>
+java -jar AAsm.jar EXECUTE <aaexe_path> [Debug]
 ```
+
+- **`<aaexe_path>`**: The path to the `.aaexe` file to execute.
+- **`Debug`**: Optional. Prints each instruction's opcode, address, and register value while executing.
 
 Example:
 ```powershell
 java -jar AAsm.jar EXECUTE output.aaexe
+```
+
+Debug example:
+```powershell
+java -jar AAsm.jar EXECUTE output.aaexe Debug
+```
+
+### Disassembling an `.aaexe` file
+
+To disassemble an `.aaexe` file back into an `.aasm` file:
+
+```powershell
+java -jar AAsm.jar DISASSEMBLE <aaexe_path>
+```
+
+- **`<aaexe_path>`**: The path to the `.aaexe` file to disassemble.
+
+The output `.aasm` file is written to the same directory as the input file and uses the same file name.
+
+Example:
+```powershell
+java -jar AAsm.jar DISASSEMBLE output.aaexe
 ```
