@@ -1,104 +1,70 @@
 package dev.apollointhehouse
 
-import dev.apollointhehouse.Mode.*
-import dev.apollointhehouse.asm.Address
-import dev.apollointhehouse.asm.Instruction
-import dev.apollointhehouse.execution.ControlUnit
-import dev.apollointhehouse.execution.HaltException
-import dev.apollointhehouse.execution.Memory
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.main
+import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.multiple
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.boolean
+import com.github.ajalt.clikt.parameters.types.path
+import dev.apollointhehouse.execution.Utils
 import dev.apollointhehouse.parsing.IO.readAAEXE
 import dev.apollointhehouse.parsing.IO.writeAAEXE
 import dev.apollointhehouse.parsing.IO.writeAASM
 import dev.apollointhehouse.parsing.Linker
 import dev.apollointhehouse.parsing.Parser
-import kotlin.io.path.Path
-import kotlin.io.path.div
 import kotlin.io.path.name
 import kotlin.io.path.readText
 
-fun main(args: Array<String>) {
-    val iter = args.iterator()
-    val mode = Mode.getByCode(iter.nextOr { throw IllegalArgumentException("Must provide a mode!") })
+class Main : CliktCommand() {
+    override fun run() = Unit
+}
 
-    when (mode) {
-        Execute -> {
-            val input = Path(iter.nextOr { throw IllegalArgumentException("Must provide input path for aaexe file!") })
-            val instructions = readAAEXE(input)
-            val debug = iter.nextOr { null }.equals("Debug", true)
-            execute(instructions, debug)
-        }
-        Assemble -> {
-            val output = Path(iter.nextOr { throw IllegalArgumentException("Must provide output path for write file!") })
-            val parent = output.parent
-            val files = args
-                .drop(2)
-                .map { parent / it }
-                .takeIf { it.isNotEmpty() }
-                ?: throw IllegalArgumentException("Must provide aasm files for write file!")
+class Execute: CliktCommand() {
+    val input by argument(help = "Input Path of .aaexe file").path(mustExist = true)
+    val debug by option().boolean().default(false)
 
-            val parsedFiles = files.map { file ->
-                val text = file
-                    .readText()
-                val parser = Parser()
+    override fun run() {
+        val instructions = readAAEXE(input)
+        Utils.execute(instructions, debug)
+    }
+}
 
-                println()
-                println("Parsing ${file.name}:")
-                parser.parse(text)
-            }
+class Assemble: CliktCommand() {
+    val output by argument(help = "Output path").path(mustExist = false)
+    val files by argument(help = "AASM Files").path(mustExist = true).multiple()
+
+    override fun run() {
+        val parsedFiles = files.map { file ->
+            val text = file
+                .readText()
+            val parser = Parser()
 
             println()
-            println("Linking:")
-            val linker = Linker(parsedFiles)
-            val instructions = linker.link()
-
-            writeAAEXE(instructions, output)
+            println("Parsing ${file.name}:")
+            parser.parse(text)
         }
-        Disassemble -> {
-            val input = Path(iter.nextOr { throw IllegalArgumentException("Must provide input path for aaexe file!") })
-            val instructions = readAAEXE(input)
 
-            writeAASM(instructions, input)
-        }
+        println()
+        println("Linking:")
+        val linker = Linker(parsedFiles)
+        val instructions = linker.link()
+
+        writeAAEXE(instructions, output)
     }
 }
 
+class Disassemble : CliktCommand() {
+    val input by argument(help = "AASM File Input").path(mustExist = true)
 
+    override fun run() {
+        val instructions = readAAEXE(input)
 
-private fun execute(instructions: List<Instruction.Raw>, debug: Boolean = false) {
-    val memory = Memory(
-        memory =  Array(4096) { 0 }
-    )
-
-    println("Instructions:")
-    println(instructions)
-    println()
-
-    val hexFormat = HexFormat {
-        upperCase = true
-        number {
-            removeLeadingZeros = true
-            minLength = 4
-        }
+        writeAASM(instructions, input)
     }
-
-    println("Writing instructions to memory:")
-    instructions.forEachIndexed { ptr, (bin) ->
-        println("${":%04d".format(ptr)} : ${bin.toUShort().toInt().toBinString(16)} | ${bin.toUShort().toInt().toHexString(hexFormat)}")
-        memory.store(Address.Raw(ptr.toShort()), bin)
-    }
-    println()
-
-    println("Starting Execution:")
-    val controlUnit = ControlUnit(
-        memory = memory,
-        debug = debug
-    )
-    try {
-        while (true) {
-            controlUnit.clock()
-        }
-    } catch (_: HaltException) {}
-
-    println()
-    println("Execution Completed!")
 }
+
+fun main(args: Array<String>) =
+    Main().subcommands(Execute(), Assemble(), Disassemble()).main(args)
